@@ -1,0 +1,16 @@
+server:
+    contextPath: /SpringTokenOauth2
+spring:
+    datasource:
+        url: jdbc:hsqldb:mem:testdb
+        driverClassName: org.hsqldb.jdbcDriver
+        username: sa
+        password:
+        platform: hsqldb
+    security:
+        oauth2:
+            resourceid: restservice
+
+# Please note: Active profiles can be set
+# Dynamically at build time through resource filtering in Gradle
+#By passing it as command line argument during gradle build with -P option
