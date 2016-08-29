@@ -56,7 +56,7 @@ class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
         clients
                 .inMemory()
                 .withClient("clientapp")
-                .authorizedGrantTypes("password", "refresh_token", "client_credentials")
+                .authorizedGrantTypes("password", "refresh_token", "client_credentials","authorization_code")
                 .authorities("USER")
                 .scopes("read", "write")
                 .resourceIds(RESOURCE_ID)

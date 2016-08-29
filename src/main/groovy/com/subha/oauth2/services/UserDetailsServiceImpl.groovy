@@ -23,7 +23,7 @@ class UserDetailsServiceImpl implements UserDetailsService{
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         SecurityContextHolder.
-        println "************ userDetailsService called............"
+        println "************ userDetailsService called............ \n ************ For User: $username"
 
           return new User(
                     999,

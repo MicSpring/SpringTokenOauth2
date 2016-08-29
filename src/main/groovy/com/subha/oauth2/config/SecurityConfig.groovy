@@ -1,5 +1,6 @@
 package com.subha.oauth2.config
 
+import com.subha.oauth2.filter.Oauth2AuthenticationFilter
 import org.apache.commons.codec.binary.Base64
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -16,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.savedrequest.RequestCacheAwareFilter
 import org.springframework.transaction.annotation.EnableTransactionManagement
 
 /**
@@ -67,11 +69,20 @@ class SecurityConfig extends WebSecurityConfigurerAdapter  {
         authenticationManager
     }
 
+    @Bean
+    public Oauth2AuthenticationFilter oauth2AuthenticationFilter() {
+        def oauth2AuthenticationFilter = new Oauth2AuthenticationFilter()
+        oauth2AuthenticationFilter.setAuthenticationManager(authenticationManagerBean())
+        oauth2AuthenticationFilter
+    }
+
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf()
                 .disable()
+
+        httpSecurity.addFilterAfter(oauth2AuthenticationFilter(),RequestCacheAwareFilter)
     }
 
 }
