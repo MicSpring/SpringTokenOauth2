@@ -31,7 +31,7 @@ class UserDetailsServiceImpl implements UserDetailsService{
                     "BOND007",
                     null,
                     null,
-                    AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_A")
+                    AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_CLIENT")
             );
         }
     }

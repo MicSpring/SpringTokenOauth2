@@ -3,23 +3,29 @@ package com.subha.oauth2.filter
 import groovy.json.JsonParser
 import org.apache.commons.logging.LogFactory
 import org.json.JSONObject
+import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationServiceException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.util.Assert
+import org.springframework.web.filter.GenericFilterBean
 
+import javax.servlet.FilterChain
 import javax.servlet.ServletException
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
  * Created by user on 8/29/2016.
  */
-class Oauth2AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+class Oauth2AuthenticationFilter extends  GenericFilterBean {
 
 
     def logger = LogFactory.getLog(Oauth2AuthenticationFilter);
@@ -31,34 +37,54 @@ class Oauth2AuthenticationFilter extends AbstractAuthenticationProcessingFilter 
     private String passwordParameter = SPRING_SECURITY_FORM_PASSWORD_KEY;
     private boolean postOnly = true;
 
-    public Oauth2AuthenticationFilter() {
-        super(new AntPathRequestMatcher("/**", "POST"));
+    private AuthenticationManager authenticationManager;
+
+    /*public Oauth2AuthenticationFilter() {
+        super(new AntPathRequestMatcher("*//**", "POST"));
+    }*/
+
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+            throws IOException, ServletException {
+
+        HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) res;
+
+
+        def auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth == null) {
+            def authentication = attemptAuthentication(request, response)
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+        chain.doFilter(request,response)
+        return
     }
 
-    public Authentication attemptAuthentication(HttpServletRequest request,
+    private Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
 
         logger.info "*********** In attemptAuthentication of Oauth2AuthenticationFilter ***********"
 
-        if (postOnly && !request.getMethod().equals("POST")) {
+       /* if (postOnly && !request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException(
                     "Authentication method not supported: " + request.getMethod());
-        }
+        }*/
 
         StringBuffer jb = new StringBuffer()
         String line = null
         JSONObject jsonObject =null
-        try {
+
+
+        /*try {
             BufferedReader reader = request.getReader();
             while ((line = reader.readLine()) != null)
                 jb.append(line);
 
             jsonObject = new JSONObject(jb.toString())
 
-        } catch (Exception e) { logger.error(e) }
+        } catch (Exception e) { logger.error(e) }*/
 
-        String username = obtainUsername(jsonObject);
-        String password = obtainPassword(jsonObject);
+        String username = obtainUsername(request);
+        String password = obtainPassword(request);
 
         if (username == null) {
             username = "";
@@ -74,7 +100,7 @@ class Oauth2AuthenticationFilter extends AbstractAuthenticationProcessingFilter 
                 username, password);
 
         // Allow subclasses to set the "details" property
-        setDetails(request, authRequest);
+        //setDetails(request, authRequest);
 
         return this.getAuthenticationManager().authenticate(authRequest);
     }
@@ -94,9 +120,9 @@ class Oauth2AuthenticationFilter extends AbstractAuthenticationProcessingFilter 
      * @return the password that will be presented in the <code>Authentication</code>
      * request token to the <code>AuthenticationManager</code>
      */
-    protected String obtainPassword(JSONObject jsonObject) {
-        logger.info(" ************ Password: ${jsonObject.get(SPRING_SECURITY_FORM_PASSWORD_KEY)}")
-        jsonObject.get(SPRING_SECURITY_FORM_PASSWORD_KEY)
+    protected String obtainPassword(HttpServletRequest request) {
+        logger.info(" ************ Password: ${request.getParameter(SPRING_SECURITY_FORM_PASSWORD_KEY)}")
+        request.getParameter(SPRING_SECURITY_FORM_PASSWORD_KEY)
     }
 
     /**
@@ -108,10 +134,10 @@ class Oauth2AuthenticationFilter extends AbstractAuthenticationProcessingFilter 
      * @return the username that will be presented in the <code>Authentication</code>
      * request token to the <code>AuthenticationManager</code>
      */
-    protected String obtainUsername(JSONObject jsonObject) {
+    protected String obtainUsername(HttpServletRequest request) {
         //return request.getParameter(usernameParameter);
-        logger.info(" ************ Username: ${jsonObject.get(SPRING_SECURITY_FORM_USERNAME_KEY)}")
-        jsonObject.get(SPRING_SECURITY_FORM_USERNAME_KEY)
+        logger.info(" ************ Username: ${request.getParameter(SPRING_SECURITY_FORM_USERNAME_KEY)}")
+        request.getParameter(SPRING_SECURITY_FORM_USERNAME_KEY)
     }
 
     /**
@@ -122,10 +148,10 @@ class Oauth2AuthenticationFilter extends AbstractAuthenticationProcessingFilter 
      * @param authRequest the authentication request object that should have its details
      * set
      */
-    protected void setDetails(HttpServletRequest request,
+    /*protected void setDetails(HttpServletRequest request,
                               UsernamePasswordAuthenticationToken authRequest) {
         authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
-    }
+    }*/
 
     /**
      * Sets the parameter name which will be used to obtain the username from the login
@@ -169,4 +195,13 @@ class Oauth2AuthenticationFilter extends AbstractAuthenticationProcessingFilter 
     public final String getPasswordParameter() {
         return passwordParameter;
     }
+
+    protected AuthenticationManager getAuthenticationManager() {
+        return authenticationManager;
+    }
+
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
+
 }

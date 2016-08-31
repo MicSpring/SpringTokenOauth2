@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -69,20 +70,29 @@ class SecurityConfig extends WebSecurityConfigurerAdapter  {
         authenticationManager
     }
 
-    @Bean
+    /*@Bean
     public Oauth2AuthenticationFilter oauth2AuthenticationFilter() {
         def oauth2AuthenticationFilter = new Oauth2AuthenticationFilter()
         oauth2AuthenticationFilter.setAuthenticationManager(authenticationManagerBean())
         oauth2AuthenticationFilter
-    }
+    }*/
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
+
+        httpSecurity.authorizeRequests().antMatchers("/resources/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
                 .csrf()
                 .disable()
 
-        httpSecurity.addFilterAfter(oauth2AuthenticationFilter(),RequestCacheAwareFilter)
+
+        //httpSecurity.addFilterAfter(oauth2AuthenticationFilter(),RequestCacheAwareFilter)
     }
+
+/*    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/resources/user");
+    }*/
 
 }

@@ -56,11 +56,21 @@ class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
         clients
                 .inMemory()
                 .withClient("clientapp")
-                .authorizedGrantTypes("password", "refresh_token", "client_credentials","authorization_code")
-                .authorities("USER")
+                .authorizedGrantTypes("authorization_code")
+                .authorities("ROLE_CLIENT")
                 .scopes("read", "write")
                 .resourceIds(RESOURCE_ID)
+                .redirectUris("http://anywhere?key=value")
                 .secret("123456")
+                .accessTokenValiditySeconds(30)
+                .refreshTokenValiditySeconds (60)
+                .and()
+                .withClient("clientapp2")
+                .authorizedGrantTypes("client_credentials", "password")
+                .authorities("ROLE_CLIENT")
+                .scopes("read")
+                .resourceIds(RESOURCE_ID)
+                .secret("99999")
                 .accessTokenValiditySeconds(30)
                 .refreshTokenValiditySeconds 60
         // @formatter:on
