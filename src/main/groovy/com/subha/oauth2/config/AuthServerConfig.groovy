@@ -33,7 +33,7 @@ class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     //JwtTokenStore tokenStore = new JwtTokenStore()
 
     @Autowired
-    @Qualifier("authenticationManagerBean")
+    //@Qualifier("authenticationManagerBean")
     private AuthenticationManager authenticationManager;
 
     @Autowired
@@ -46,7 +46,7 @@ class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
         endpoints
                 .tokenStore(this.tokenStore)
                 .authenticationManager(this.authenticationManager)
-                //.userDetailsService(userDetailsService);
+                .userDetailsService(userDetailsService);
         // @formatter:on
     }
 
@@ -62,17 +62,14 @@ class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
                 .resourceIds(RESOURCE_ID)
                 .redirectUris("http://anywhere?key=value")
                 .secret("123456")
-                .accessTokenValiditySeconds(30)
-                .refreshTokenValiditySeconds (60)
                 .and()
                 .withClient("clientapp2")
-                .authorizedGrantTypes("client_credentials", "password")
+                .authorizedGrantTypes("client_credentials", "password","refresh_token")
                 .authorities("ROLE_CLIENT")
-                .scopes("read")
+                .scopes("read","write")
                 .resourceIds(RESOURCE_ID)
                 .secret("99999")
-                .accessTokenValiditySeconds(30)
-                .refreshTokenValiditySeconds 60
+                .accessTokenValiditySeconds(92)
         // @formatter:on
     }
 
@@ -87,6 +84,7 @@ class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
         DefaultTokenServices tokenServices = new DefaultTokenServices();
         tokenServices.setSupportRefreshToken(true)
         tokenServices.setTokenStore(this.tokenStore)
+        //tokenServices.setRefreshTokenValiditySeconds(90)
         tokenServices;
     }
 }

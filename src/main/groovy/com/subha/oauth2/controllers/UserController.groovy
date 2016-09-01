@@ -15,14 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     @RequestMapping(value = "/user",method = RequestMethod.POST)
-    void getUser(/*Authentication authentication*/) {
+    String getUser(Authentication authentication) {
        // println "***** ${authentication.getClass()}"
-        println"************** I am Foing Great"
+        "***** ${authentication.getClass()} \n\n ************** I am Foing Great"
     }
 
     @RequestMapping(value = "/user1",method = RequestMethod.POST)
-    String getUser1(/*Authentication authentication*/) {
+    String getUser1(Authentication authentication) {
        // println "***** ${authentication.getClass()}"
-       println "************** I do not have authentication"
+        "***** ${authentication.getClass()} \n" +
+"************** I do not have authentication"
     }
 }
