@@ -1,5 +1,6 @@
 package com.subha.oauth2.config
 
+import com.subha.oauth2.utils.CustomJWTTokenEnhancer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -14,8 +15,11 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
+import org.springframework.security.oauth2.provider.token.TokenEnhancer
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain
 import org.springframework.security.oauth2.provider.token.TokenStore
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore
 
 /**
@@ -29,7 +33,7 @@ class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     @Value('${spring.security.oauth2.resourceid}')
     String RESOURCE_ID// = 'restService'
 
-     TokenStore tokenStore = new InMemoryTokenStore();
+     //TokenStore tokenStore = new InMemoryTokenStore();
     //JwtTokenStore tokenStore = new JwtTokenStore()
 
     @Autowired
@@ -39,15 +43,44 @@ class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+
+    @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter()
+        converter.setSigningKey("123")
+        return converter;
+    }
+
+    @Bean
+    public TokenStore tokenStore(){
+        def tokenStore = new JwtTokenStore(accessTokenConverter())
+        tokenStore
+    }
+
+
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
             throws Exception {
         // @formatter:off
+
+        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+        tokenEnhancerChain.setTokenEnhancers(
+                Arrays.asList(tokenEnhancer(), accessTokenConverter()));
+
+
         endpoints
-                .tokenStore(this.tokenStore)
+                .tokenStore(tokenStore())
+                //.accessTokenConverter(accessTokenConverter())
+                .tokenEnhancer(tokenEnhancerChain)
                 .authenticationManager(this.authenticationManager)
-                .userDetailsService(userDetailsService);
+               // .userDetailsService(userDetailsService);
         // @formatter:on
+    }
+
+    @Bean
+    public TokenEnhancer tokenEnhancer(){
+        def tokenEnhancer =  new CustomJWTTokenEnhancer()
+        tokenEnhancer
     }
 
     @Override
@@ -83,7 +116,7 @@ class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     public DefaultTokenServices tokenServices() {
         DefaultTokenServices tokenServices = new DefaultTokenServices();
         tokenServices.setSupportRefreshToken(true)
-        tokenServices.setTokenStore(this.tokenStore)
+        tokenServices.setTokenStore(tokenStore())
         //tokenServices.setRefreshTokenValiditySeconds(90)
         tokenServices;
     }
