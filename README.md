@@ -56,7 +56,7 @@ and in the request header there should be: <br/>
 
 <b>Authorization  Bearer Y2xpZW50YXBwMjo5OTk5OQ==</b><br/>
 
-<b>Y2xpZW50YXBwMjo5OTk5OQ==<b> is <b>clientapp2:99999</b><br/>
+<b>Y2xpZW50YXBwMjo5OTk5OQ==</b> is <b>clientapp2:99999</b><br/>
 
 And <b>Client Credentials</b> grant type:<br/>
 
